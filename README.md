@@ -77,7 +77,7 @@ node.data_search(data_name)
 Verification code can only be used in systems configured using joining.sh.
 Run scan.py to generate logs and execute eureka.py to verify that the system has been set up stably.
 - run scan.py on each server
- **Parameter value**
+**Parameter value**
   - `removed_port` : The port number of the deleted node for handling exceptions related to deleted nodes.
   - `range_start` : The lowest port number among the configured nodes on the server.
   - `range end` : The highest port number among the configured nodes on the server.
