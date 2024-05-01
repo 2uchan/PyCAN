@@ -63,14 +63,15 @@ Please modify the config file according to your environment.
 ## API
 ```
 node = NodeBase(args)
-threading.Thread(target=node.firstjob, daemon=True).start() 
+threading.Thread(target=node.firstjob, daemon=True).start() ## Declare the node and execute it to run as a daemon thread
 
-node.data_add(data_name, data_content)
-node.file_add(file_name)
+node.data_add(data_name, data_content)  ## Add data to the system
+node.file_add(file_name)  ## Add file to the system
 
-node.data_remove(data_name)
+node.data_remove(data_name)  ## Remove the data added to the system.
 
-node.data_search(data_name)
+node.data_search(data_name)  ## Receive the desired data by finding and retrieving it. In the case of searching for files, you can still use the same function.
+recieved_data = node.recieved_data(data_name)  ## Return the received data. If a file search was requested, and the file is saved, then the return process is not required.
 ```
 
 ## Verification
