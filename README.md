@@ -62,7 +62,6 @@ Please modify the config file according to your environment.
     ```
 
 ## API
-
 ```
 node = NodeBase(args)
 threading.Thread(target=node.firstjob, daemon=True).start() 
