@@ -33,7 +33,7 @@ Please modify the config file according to your environment.
       - `bootstrap` : Is this node Boostrap? (boolean)
       - `node_num` : This node's number
   
-    ### Example
+    ### Example 
       **Bootstrap**
       ```
       python3 Main.py --port 13000 --bootstrap True --node_num 0
@@ -46,8 +46,7 @@ Please modify the config file according to your environment.
   
   ### Generate multi nodes
   - run joining.sh
-  In joining.sh, allocate port 13000 to the bootstrap, then incrementally assign port numbers to new nodes, increasing by 1 for each node.
-  If you want to change the bootstrap port, modify the "ports" variable in joining.sh, and update the "host_port" in seeing.json accordingly.
+  In joining.sh, allocate port 13000 to the bootstrap, then incrementally assign port numbers to new nodes, increasing by 1 for each node. If you want to change the bootstrap port, modify the "ports" variable in joining.sh, and update the "host_port" in seeing.json accordingly.
 
     **Parameter value**
     - `mode` : 1(Bootstrap+Nodes), 2(Nodes)
