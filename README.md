@@ -47,7 +47,8 @@ Please modify the config file according to your environment.
   ### Generate multi nodes
   - run joining.sh
   In joining.sh, allocate port 13000 to the bootstrap, then incrementally assign port numbers to new nodes, increasing by 1 for each node.
-  If you want to change the   bootstrap port, modify the "ports" variable in joining.sh, and update the "host_port" in seeing.json accordingly.
+  If you want to change the bootstrap port, modify the "ports" variable in joining.sh, and update the "host_port" in seeing.json accordingly.
+
     **Parameter value**
     - `mode` : 1(Bootstrap+Nodes), 2(Nodes)
     - `total node num` : The number of nodes to be created
@@ -56,9 +57,9 @@ Please modify the config file according to your environment.
     - `server array` : Ip addresses of the servers
   
     **Example**
-    '''
+    ```
     ./joining.sh 1 500 0 5 '220.11.111.100' '220.11.111.101' '220.11.111.102' '220.11.111.103' '220.11.111.103'
-    '''
+    ```
 
 ## API
 
@@ -79,18 +80,18 @@ Verification code can only be used in systems configured using joining.sh.
 Run scan.py to generate logs and execute eureka.py to verify that the system has been set up stably.
 - run scan.py on each server
   **Parameter value**
-      `removed_port` : The port number of the deleted node for handling exceptions related to deleted nodes.
-      `range_start` : The lowest port number among the configured nodes on the server.
-      `range end` : The highest port number among the configured nodes on the server.
-      `address` : Ip address of the server
+      - `removed_port` : The port number of the deleted node for handling exceptions related to deleted nodes.
+      - `range_start` : The lowest port number among the configured nodes on the server.
+      - `range end` : The highest port number among the configured nodes on the server.
+      - `address` : Ip address of the server
 
 - After consolidating the logs into a server, run eureka.py
   **Parameter value**
-      `removed_num` : The node number of the deleted node for handling exceptions related to deleted nodes. Confirm that it's the node number, not the port number. 
-      `dimension` : The dimension of CAN space
-      `max_zone`  : The size of space
-      `node_nums` : The total number of nodes
-      `route` :  The path where the logs are stored
+      - `removed_num` : The node number of the deleted node for handling exceptions related to deleted nodes. Confirm that it's the node number, not the port number. 
+      - `dimension` : The dimension of CAN space
+      - `max_zone`  : The size of space
+      - `node_nums` : The total number of nodes
+      - `route` :  The path where the logs are stored
 
 
   
