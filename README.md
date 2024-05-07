@@ -54,9 +54,12 @@ Please modify the config file according to your environment.
     - `server index` : To initialize the index for partitioning across multiple servers, please enter 0 when starting the shell script.
     - `number of server` : The number of servers on which nodes will be created
     - `server array` : Ip addresses of the server
+
   
     **Example**
+    
     A simple example of distributing 500 nodes across 5 servers
+
     ```
     ./joining.sh 1 500 0 5 '220.11.111.100' '220.11.111.101' '220.11.111.102' '220.11.111.103' '220.11.111.103'
     ```
