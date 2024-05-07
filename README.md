@@ -53,9 +53,10 @@ Please modify the config file according to your environment.
     - `total node num` : The number of nodes to be created
     - `server index` : To initialize the index for partitioning across multiple servers, please enter 0 when starting the shell script.
     - `number of server` : The number of servers on which nodes will be created
-    - `server array` : Ip addresses of the servers
+    - `server array` : Ip addresses of the server
   
     **Example**
+    A simple example of distributing 500 nodes across 5 servers
     ```
     ./joining.sh 1 500 0 5 '220.11.111.100' '220.11.111.101' '220.11.111.102' '220.11.111.103' '220.11.111.103'
     ```
@@ -71,7 +72,7 @@ node.file_add(file_name)  ## Add file to the system
 node.data_remove(data_name)  ## Remove the data added to the system.
 
 node.data_search(data_name)  ## Receive the desired data by finding and retrieving it. In the case of searching for files, you can still use the same function.
-recieved_data = node.recieved_data(data_name)  ## Return the received data. If a file search was requested, and the file is saved, then the return process is not required.
+received_data = node.received_data(data_name)  ## Return the received data. If a file search was requested, and the file is saved, then the return process is not required.
 ```
 
 ## Verification
