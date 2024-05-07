@@ -8,10 +8,11 @@ We have implemented a scalable content addressable network (CAN) capable of orga
 * 23.06.12 ~ present
 
 ## Participating workforce
- - Korea Aerospace University Distributed Big Data Computing Lab
- - Professor (Department of Computer Engineering) : Jaehwan Lee - Advisor
- - Master's research student (Department of Electronic and Information Engineering) : Sookwang Lee - CAN code configuration
- - undergraduate research student (School of Electronic and Information Engineering) : Yuchan Lee -  CAN code configuration, CAN node verification code (eureka)
+ - Korea Aerospace University Department of Computer Engineering
+ - Distributed Big Data Computing Lab
+ - Professor : Jaehwan Lee - Advisor
+ - Master's research student : Sookwang Lee - CAN code configuration
+ - undergraduate research student : Yuchan Lee -  CAN code configuration, CAN node verification code (eureka)
 
 ## Development environment
 - `Python 3.7.4`
