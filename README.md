@@ -8,7 +8,8 @@ We have implemented a scalable content addressable network (CAN) capable of orga
 * 23.06.12 ~ present
 
 ## Participating workforce
- **Korea Aerospace University Department of Computer Engineering**
+ **Korea Aerospace University** 
+ **Department of Computer Engineering**
  
  [**Distributed Big Data Computing Lab**](https://sites.google.com/site/jaehwanlee/home)
  - Professor : Jaehwan Lee - Advisor
