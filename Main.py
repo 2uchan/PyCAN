@@ -32,6 +32,6 @@ if __name__ == '__main__':
     
     this_addr = (this_ip, args.port)
 
-    node = NodeBase(args.port, args.bootstrap, args.node_num) 
-    node.firstjob()
+    node = NodeBase(args.port, args.node_num, args.bootstrap) 
+    node.run()
     print('bye bye',args.port)

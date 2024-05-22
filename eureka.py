@@ -107,7 +107,7 @@ class Eureka:
         self.entire_space()
         self.eureka()
         #self.coord_stats()
-        #self.neigh_stats()
+        self.neigh_stats()
 
     def position(self):	##check hashmap is located inside the coordinates
 
@@ -274,7 +274,7 @@ class Eureka:
         plt.ylabel('the number of nodes')
         plt.savefig('neigh.png')
         plt.close()
-        plt.bar(range(2000),stats)
+        plt.bar(range(self.nodes),stats)
         plt.xlabel('Node num')
         plt.ylabel('the number of neighbors')
         #plt.title('Comunication volume of Bootstrap (build up phase)')

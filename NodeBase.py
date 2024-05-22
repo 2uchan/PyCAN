@@ -40,9 +40,8 @@ class NodeBase:
         self.bootstrap = bootstrap
         self.max_zone = config['max_zone']
         self.point = self.hash_func(self.this_addr)
-        self.past_queue = list()
         self.ctime = int(time.time())
-        self.heart_time= self.ctime
+        self.heart_time= self.ctime + 10
         self.timer_time = self.ctime + random.randint(50,150)
         self.nn_table = dict()
         self.timer = dict()
@@ -56,14 +55,13 @@ class NodeBase:
         self.tlock = threading.Lock()
         self.nlock = threading.Lock()
         self.nnlock = threading.Lock()
-        self.qlock = threading.Lock()
         self.dlock = threading.Lock()
         self.dplock = threading.Lock()
         self.szlock = threading.Lock()  ## 측정용
         self.size = dict()  ##측정용 나중에 지우기
 
         
-    def firstjob(self):
+    def run(self):
         #self.point = self.hash_to_zone(args.hash_text, self.dimension, self.max_zone, 123)
         if self.bootstrap:
             self.alone = False
@@ -74,7 +72,7 @@ class NodeBase:
             self.z = Zone(*self.zone_list)  # Initialized Bootstrap node
             self.n = Neighbor(self.this_addr, self.point, self.z.zone,None,None)  # Neighbout table setting (this_address, point, zone)
             self.s = Split(None, None)
-            self.s.stack = [sublist for sublist in self.s.stack if sublist != [None, None]]
+            self.s.history = [sublist for sublist in self.s.history if sublist != [None, None]]
             print('Bootstrap hash table :',self.this_addr,self.point) # Print initialized bootstrap point
         else:
             #for i in range(args.dimension):
@@ -83,7 +81,6 @@ class NodeBase:
             self.z = None
             self.client_table = dict()
             self.sucess = False
-            self.past_queue = []
             
             #print("node IP is:", this_ip)
             #print("node Port is:", self.port)
@@ -101,26 +98,23 @@ class NodeBase:
         # set listening daemon
         self.selector = selectors.DefaultSelector()
         self.selector.register(self.socket, selectors.EVENT_READ, self.accept_handler)
-        self.listen_t = threading.Thread(target=self.run, daemon=True, name="run")
+        self.listen_t = threading.Thread(target=self.listener, daemon=True, name="listener")
         self.listen_t.start()
         
         if self.bootstrap == False :
             self.join()
-        self.mainjob()
-
-    def mainjob(self):
         while self.alive:
             time.sleep(2)
             if not self.alone:
                 self.stablize()
-
+        
     def stablize(self):
         self.ctime = int(time.time())
         if self.ctime>=self.heart_time: 
             with self.zlock:
                 with self.slock:
                     with self.nlock:
-                        sending_data = (self.point,self.z.zone,self.s.stack,self.n.neighbor_table.items(),self.datapoint_dict)
+                        sending_data = (self.point,self.z.zone,self.s.history,self.n.neighbor_table.items(),self.datapoint_dict)
                         sending_data = str(sending_data)
                         hash_data = hashlib.md5(sending_data.encode()).hexdigest()
                         msg = ('heart beat', self.this_addr, hash_data)
@@ -130,7 +124,7 @@ class NodeBase:
                                 sock.connect(a)
                                 sock.sendall(pickle.dumps(msg))
                                 sock.close()
-                                self.heart_time = self.ctime + (5*self.dimension)
+                                self.heart_time = self.ctime + 30
                             except Exception as e:
                                 print(f"An error occured: {e}",'heart beat','from',self.this_addr,'to',a)
                                 self.heart_time = self.ctime + random.randint(2,7)
@@ -176,12 +170,12 @@ class NodeBase:
                         if ta not in self.n.neighbor_table:
                             expired_list.append(ta)
                         else:
-                            if self.ctime-t >=10*self.dimension:
+                            if self.ctime-t >=100:
                                 msg = ('info request', self.this_addr)
                                 self.sender(msg,ta)
                                 self.n.neighbor_update(self.z.zone)
 
-                            elif self.ctime-t >=15*self.dimension:
+                            elif self.ctime-t >=150:
                                 print(self.this_addr,ta,'timer expired')
                                 print('-'*10,"terminate",ta,'-'*10)
                                 msg = ('terminate',ta)
@@ -205,15 +199,15 @@ class NodeBase:
                                             if terminate_addr in self.n.neighbor_table.keys():
                                                 [tp,tz,ts,tdp] = self.n.neighbor_table[terminate_addr]
                                                 t_zone = Zone(*list(sum(tz,[])))
-                                                t_stack = Split(None,None)
-                                                t_stack.stack = t_stack.stack + ts
-                                                valid, expand, poped_stack=t_stack.valid(self.z.zone,t_zone.zone)
+                                                t_history = Split(None,None)
+                                                t_history.history = t_history.history + ts
+                                                valid, expand, poped_history=t_history.valid(self.z.zone,t_zone.zone)
                                                 if valid:
                                                     self.z = Zone(*list(sum(expand, [])))
                                                     print('-'*10,self.this_addr, 'original Zone expanded to merge',terminate_addr,'-'*10)
                                                     #self.z.show()
-                                                    #print('stack:',self.s.get_Split_stack())
-                                                    self.s.erase(poped_stack)             ## 사용된 분기정보가 나의 스택에서도 있었다면 삭제
+                                                    #print('history:',self.s.get_Split_history())
+                                                    self.s.erase(poped_history)             ## 사용된 분기정보가 나의 스택에서도 있었다면 삭제
                                                     with self.nnlock:
                                                         if terminate_addr in self.nn_table:
                                                             terminated_neighbor_table = self.nn_table.pop(terminate_addr)
@@ -227,7 +221,7 @@ class NodeBase:
                                                     if terminate_addr in self.n.neighbor_table:
                                                         del(self.n.neighbor_table[terminate_addr])    ## nieghbor에서 삭제
                                                     with self.dplock:
-                                                        self.n.neighbor_table[self.this_addr] = [self.point, self.z.zone, self.s.get_Split_stack(),self.datapoint_dict]
+                                                        self.n.neighbor_table[self.this_addr] = [self.point, self.z.zone, self.s.get_Split_history(),self.datapoint_dict]
                                                     self.check = int(time.time())+300
                                                     msg = ('neighbor update', self.this_addr, self.n.get_neighbor_table())
                                                     for a in self.n.neighbor_table.keys():
@@ -250,9 +244,8 @@ class NodeBase:
     def join(self):
         msg = ('join', self.this_addr, self.point)
         self.sender(msg,self.host_addr)
-        self.mainjob()
 
-    def run(self):
+    def listener(self):
         while self.alive:
             self.selector = selectors.DefaultSelector()
             self.selector.register(self.socket, selectors.EVENT_READ, self.accept_handler)
@@ -309,7 +302,7 @@ class NodeBase:
         return tuple(zone_list)
     
     def routing_zn(self,hm,past_queue):
-        if self.z.isContain(hm):
+        if self.z.contain(hm):
             return self.this_addr,None
         else:
             min_distance = self.max_zone ** self.dimension
@@ -320,7 +313,7 @@ class NodeBase:
                     del(temp_neigh[past])
             for a, [p, z, s, dp] in temp_neigh.items():
                 z = Zone(*list(sum(z, [])))
-                if z.isContain(hm):
+                if z.contain(hm):
                     return a,past_queue
                 else:
                     orth,o_dist=z.orthogonal(hm,min_distance)
@@ -420,7 +413,7 @@ class NodeBase:
     def datapoint_update_zdp(self):     ### require zlock & dplock
         update_list = []
         for data_point in self.datapoint_dict.keys():
-            if self.z.isContain(data_point) == False:
+            if self.z.contain(data_point) == False:
                 update_list.append(data_point)
         for del_point in update_list:
             del(self.datapoint_dict[del_point])
@@ -429,6 +422,7 @@ class NodeBase:
         """
         handle msg from other nodes
         """
+
         if msg[0] == 'join':
             #print("Node", msg[1], "join.")
             # msg : ('join', new Node (ip, port), new Node (point))
@@ -441,7 +435,7 @@ class NodeBase:
                     min_addr,past_queue = self.routing_zn(join_point,empty_queue)
 
             #self.client_table[join_node] = join_point
-            msg = ('zone check',self.this_addr, join_node, join_point, self.past_queue)
+            msg = ('zone check',self.this_addr, join_node, join_point, past_queue)
             self.sender(msg,min_addr)  
                             
 
@@ -449,29 +443,28 @@ class NodeBase:
             past_addr = msg[1]
             new_node_addr = msg[2]
             new_node_point = msg[3]
-            with self.qlock:
-                self.past_queue = msg[4]
+            past_queue = msg[4]
 
             # msg : ('zone check', new Node (ip, port), new Node (point), number of node, queue node)
             #print('receive queue node',this_addr, msg[4])
             #print(queue_nodes)
             with self.zlock:
-                if self.z.isContain(new_node_point):
+                if self.z.contain(new_node_point):
                     print('This node', self.this_addr,self.z.zone,'is included in the join point!')
                     origin_zone, join_zone, s_axis, s_cut = self.z.Split_Axis(self.point, new_node_point, self.dimension)
                     self.z = Zone(*list(sum(origin_zone, [])))
                     with self.slock:
-                        self.s.stack.append([s_axis,s_cut])
+                        self.s.history.append([s_axis,s_cut])
                     print('-'*10,self.this_addr, 'original Zone Changed','by',msg[2],'-'*10)
                     self.z.show()
                     # neighbor_update(peer zone, join node (ip, port), join node zone, join node point)
                     #self.n.neighbor_update(self.z.zone, new_node_addr, join_zone, new_node_point)
                     with self.slock:
-                        print('stack:',self.s.get_Split_stack())
+                        print('history:',self.s.get_Split_history())
                     with self.nlock:
                         with self.dplock:
-                            self.n.neighbor_table[self.this_addr] = [self.point, self.z.zone, self.s.get_Split_stack(),self.datapoint_dict]
-                            msg = ('set zone', self.this_addr, join_zone, self.n.get_neighbor_table(), self.z.zone, self.point,self.s.stack,self.nn_table,self.datapoint_dict)
+                            self.n.neighbor_table[self.this_addr] = [self.point, self.z.zone, self.s.get_Split_history(),self.datapoint_dict]
+                            msg = ('set zone', self.this_addr, join_zone, self.n.get_neighbor_table(),self.s.history,self.nn_table,self.datapoint_dict)
                             self.sender(msg,new_node_addr) 
                             self.datapoint_update_zdp()   
                         self.n.neighbor_update(self.z.zone)
@@ -482,24 +475,22 @@ class NodeBase:
                     
                 else :
                     #print('This node is not included in the join point!')
-                    with self.qlock:
-                        self.past_queue.append(past_addr)
+                    past_queue.append(past_addr)
                     with self.nlock:
                         temp_neighbor = copy.deepcopy(self.n.get_neighbor_table())
-                    with self.qlock:
-                        for past_node in self.past_queue:
-                                if past_node in temp_neighbor.keys():
-                                    del(temp_neighbor[past_node])
+
+                    for past_node in past_queue:
+                            if past_node in temp_neighbor.keys():
+                                del(temp_neighbor[past_node])
                     self.sucess = False
 
                     #del(temp_neighbor[self.this_addr])
                     for a , [p,z,s,dp] in temp_neighbor.items():
                         z = Zone(*list(sum(z, [])))
-                        if z.isContain(new_node_point):
+                        if z.contain(new_node_point):
                             print('The join point',new_node_point, 'is included in the spatial zone of Address', a, z.zone)
-                            with self.qlock:
-                                msg = ('zone check', self.this_addr, new_node_addr, new_node_point, self.past_queue)
-                                self.sender(msg,a)
+                            msg = ('zone check', self.this_addr, new_node_addr, new_node_point,past_queue)
+                            self.sender(msg,a)
                                 
                             self.sucess = True
                             #self.n.neighbor_table[self.this_addr] = [self.point, self.z.zone]
@@ -519,9 +510,8 @@ class NodeBase:
                                 if dist < min_distance:
                                     min_distance= dist
                                     min_addr = a
-                        with self.qlock:
-                            msg = ('zone check', self.this_addr, new_node_addr, new_node_point, self.past_queue)
-                            self.sender(msg,min_addr)
+                        msg = ('zone check', self.this_addr, new_node_addr, new_node_point, past_queue)
+                        self.sender(msg,min_addr)
                         self.sucess = False
 
         elif msg[0] == 'neighbor update' and not self.alone:
@@ -578,11 +568,9 @@ class NodeBase:
             contain_neighbor_addr = msg[1]
             join_zone = msg[2]
             contain_neighbor_table = msg[3]
-            contain_neighbor_zone = msg[4]
-            contain_neighbor_point = msg[5]
-            s_info = msg[6]
-            contain_nn_table = msg[7]
-            contain_neighbor_datapoint = msg[8]
+            s_info = msg[4]
+            contain_nn_table = msg[5]
+            contain_neighbor_datapoint = msg[6]
             self.check=self.ctime + 300
             with self.zlock:
                 self.z = Zone(*list(sum(join_zone, [])))
@@ -591,8 +579,8 @@ class NodeBase:
                 self.z.show()
             with self.slock:
                 self.s = Split(None,None)
-                self.s.stack = s_info
-                print('stack:',self.s.get_Split_stack())
+                self.s.history = s_info
+                print('history:',self.s.get_Split_history())
             contain_neighbor_list = contain_neighbor_table.keys()
             with self.zlock:
                 with self.dplock:
@@ -600,15 +588,13 @@ class NodeBase:
                     self.datapoint_update_zdp()
             with self.zlock:
                 with self.slock:
-                    contain_neighbor_table[self.this_addr] = [self.point, self.z.zone, self.s.get_Split_stack(), self.datapoint_dict]
-                    contain_neighbor_zone = Zone(*list(sum(contain_neighbor_zone, [])))
+                    contain_neighbor_table[self.this_addr] = [self.point, self.z.zone, self.s.get_Split_history(), self.datapoint_dict]
                     with self.nlock:
-                        self.n = Neighbor(self.this_addr, self.point, self.z.zone,self.s.get_Split_stack(),self.datapoint_dict)
-
+                        self.n = Neighbor(self.this_addr, self.point, self.z.zone,self.s.get_Split_history(),self.datapoint_dict)
                         self.n.neighbor_table = copy.deepcopy(contain_neighbor_table)
                         self.n.neighbor_update(self.z.zone)
                         with self.dplock:
-                            self.n.neighbor_table[self.this_addr] = [self.point, self.z.zone, self.s.get_Split_stack(), self.datapoint_dict]
+                            self.n.neighbor_table[self.this_addr] = [self.point, self.z.zone, self.s.get_Split_history(), self.datapoint_dict]
                         with self.nnlock:
                             self.nn_table = contain_nn_table
                             self.nn_table[self.this_addr] = self.n.get_neighbor_table()
@@ -619,17 +605,7 @@ class NodeBase:
                     msg = ('neighbor update', self.this_addr, self.n.get_neighbor_table())
                     self.sender(msg,a)
             #time.sleep(3)
-            with self.qlock:
-                msg = ('queue reset', self.this_addr)
-                for past_a in self.past_queue:
-                    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-                    try:
-                        sock.connect(past_a)
-                        sock.sendall(pickle.dumps(msg))
-                        sock.close()
-                    except Exception as e:
-                        print(f"An error occured: {e}",msg[0],'from',self.this_addr,'to',past_a)
-                self.past_queue = []
+
             log_file = open("/home/deepl/yuchan/CAN/log.txt", "w")
             log_file.write("Queue reset!"+"("+str(self.node_num)+")")
             log_file.close()
@@ -642,7 +618,7 @@ class NodeBase:
             f.write(str(self.this_addr)+'\n')
             f.write(str(self.z.getCoords())+'\n')
             f.write(str(self.point)+'\n') 
-            f.write(str(self.s.stack)+'\n')
+            f.write(str(self.s.history)+'\n')
             f.write(str(self.datapoint_dict)+'\n')
             f.write(str(self.n.neighbor_table)+'\n')
             f.write(str(self.nn_table)+'\n')
@@ -662,7 +638,7 @@ class NodeBase:
             with self.zlock:
                 self.z.show()
             with self.slock:
-                print('stack:',self.s.get_Split_stack())
+                print('history:',self.s.get_Split_history())
             with self.nlock:
                 msg = ('terminate',self.this_addr)
                 for a, [p,z,s,dp] in self.n.get_neighbor_table().items():
@@ -681,15 +657,15 @@ class NodeBase:
                         if terminate_addr in self.n.neighbor_table.keys():
                             [tp,tz,ts,tdp] = self.n.neighbor_table[terminate_addr]
                             t_zone = Zone(*list(sum(tz,[])))
-                            t_stack = Split(None,None)
-                            t_stack.stack = t_stack.stack + ts
-                            valid, expand, poped_stack=t_stack.valid(self.z.zone,t_zone.zone)
+                            t_history = Split(None,None)
+                            t_history.history = t_history.history + ts
+                            valid, expand, poped_history=t_history.valid(self.z.zone,t_zone.zone)
                             if valid:
                                 self.z = Zone(*list(sum(expand, [])))
                                 print('-'*10,self.this_addr, 'original Zone expanded to merge',terminate_addr,'-'*10)
                                 #self.z.show()
-                                #print('stack:',self.s.get_Split_stack())
-                                self.s.erase(poped_stack)             ## 사용된 분기정보가 나의 스택에서도 있었다면 삭제
+                                #print('history:',self.s.get_Split_history())
+                                self.s.erase(poped_history)             ## 사용된 분기정보가 나의 스택에서도 있었다면 삭제
                                 with self.nnlock:
                                     if terminate_addr in self.nn_table:
                                         terminated_neighbor_table = self.nn_table.pop(terminate_addr)
@@ -703,7 +679,7 @@ class NodeBase:
                                 if terminate_addr in self.n.neighbor_table:
                                     del(self.n.neighbor_table[terminate_addr])    ## nieghbor에서 삭제
                                 with self.dplock:
-                                    self.n.neighbor_table[self.this_addr] = [self.point, self.z.zone, self.s.get_Split_stack(),self.datapoint_dict]
+                                    self.n.neighbor_table[self.this_addr] = [self.point, self.z.zone, self.s.get_Split_history(),self.datapoint_dict]
                                 self.check = int(time.time())+300
                                 msg = ('neighbor update', self.this_addr, self.n.get_neighbor_table())
                                 for a in self.n.neighbor_table.keys():
@@ -714,10 +690,7 @@ class NodeBase:
                                 del(self.n.neighbor_table[terminate_addr])
             self.check=self.ctime + 300
                                 
-            
-        elif msg[0] == 'queue reset':
-            with self.qlock:
-                self.past_queue = []
+
         
         elif msg[0] == 'neighbor list request' and not self.alone:
             header,a = msg
@@ -734,13 +707,13 @@ class NodeBase:
                 self.n.neighbor_update(self.z.zone)
 
         elif msg[0] == 'info' and not self.alone:
-            ##msg = ('heart beat',self.this_addr, self.z.zone, self.point, self.s.stack, self.n.get_neighbor_table())
-            header,neigh_addr,neigh_zone,neigh_point,neigh_stack,neigh_neigh_table,neigh_datapoint = msg
+            ##msg = ('heart beat',self.this_addr, self.z.zone, self.point, self.s.history, self.n.get_neighbor_table())
+            header,neigh_addr,neigh_zone,neigh_point,neigh_history,neigh_neigh_table,neigh_datapoint = msg
             remove_nn =[]
             with self.tlock:
                 self.timer[neigh_addr] = self.ctime
             with self.nlock:
-                self.n.neighbor_table[neigh_addr] = [neigh_point,neigh_zone,neigh_stack,neigh_datapoint]
+                self.n.neighbor_table[neigh_addr] = [neigh_point,neigh_zone,neigh_history,neigh_datapoint]
                 self.n.neighbor_update(self.z.zone)
                 with self.nnlock:
                     self.nn_table[neigh_addr] = neigh_neigh_table
@@ -756,7 +729,7 @@ class NodeBase:
                 with self.slock:
                     with self.nlock:
                         with self.dplock:
-                            msg = ('info', self.this_addr,self.z.zone, self.point, self.s.stack, self.n.get_neighbor_table(),self.datapoint_dict)
+                            msg = ('info', self.this_addr,self.z.zone, self.point, self.s.history, self.n.get_neighbor_table(),self.datapoint_dict)
                             self.sender(msg,req_addr)
             
         elif msg[0] == 'heart beat' and not self.alone:
@@ -944,8 +917,3 @@ class NodeBase:
             self.seed += 12
 
         return self.zone
-
-
-
-
-

@@ -38,7 +38,7 @@ class Zone:
             print("Lower:", self.lower[i], "Upper:", self.upper[i])
             print("Center:", self.centers[i])
 
-    def isContain(self, *args):
+    def contain(self, *args):
         # Check if the hash zone are included in the peer area.
         point = list(*args)
         return all(l <= x < u for l, u, x in zip(self.lower, self.upper, point))

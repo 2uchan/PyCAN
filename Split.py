@@ -3,28 +3,28 @@ class Split:
     def __init__(self, s_axis, s_cut):
         self.axis = s_axis
         self.cut = s_cut
-        self.stack = [[s_axis,s_cut]]
+        self.history = [[s_axis,s_cut]]
 
     def push(self,val):
-        self.stack.append(val)
+        self.history.append(val)
 
     def pop(self):
         if not self.is_empty():
-            return self.stack.pop()
+            return self.history.pop()
         else:
-            print("split stack is empty")
+            print("split history is empty")
             return None
 
     def erase(self,info):
-        if info in self.stack:
-            self.stack.remove(info)
+        if info in self.history:
+            self.history.remove(info)
 
-    def get_Split_stack(self):
-        return self.stack
+    def get_Split_history(self):
+        return self.history
     
     def valid(self,z,t_z):
-        while self.stack:
-            split_data=self.stack.pop()
+        while self.history:
+            split_data=self.history.pop()
             split_axis = split_data[0]
             split_cut = split_data[1]
             for shared_axis in range(len(z)):    ## which axis is orthogonal to the node
