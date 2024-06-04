@@ -72,7 +72,7 @@ Please modify the config file according to your environment.
 
 ## API
 ```
-node = NodeBase(args)
+node = NodeBase(port, node_num, bootstrap)
 threading.Thread(target=node.run, daemon=True).start() ## Declare the node and execute it to run as a daemon thread
 
 node.data_add(data_name, data_content)                      ## Add data to the system
