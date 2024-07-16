@@ -1,0 +1,6 @@
+{
+    "host_addr": "220.11.111.100",
+    "host_port": 13000,
+    "dimension": 7,
+    "max_zone": 65536
+}
