@@ -1,5 +1,5 @@
 """ Created on 2023
-@author: Sookwang Lee (Korea Aerospace Univ)
+@author: Yuchan Lee, Sookwang Lee, Jaehwan Lee (Korea Aerospace Univ)
 """
 
 import numpy as np
