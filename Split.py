@@ -1,3 +1,6 @@
+""" Created on 2023
+@author: Yuchan Lee, Sookwang Lee, Jaehwan Lee (Korea Aerospace Univ)
+"""
 
 class Split:
     def __init__(self, s_axis, s_cut):
