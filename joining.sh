@@ -59,7 +59,7 @@ done
 ((sever_index++))
 echo "${server_array[$sever_index]} , $sever_index"
 # send to next server(Mode 2) to join Nodes
-ssh -p 6304 deepl@${server_array[$sever_index]} "source ~/anaconda3/bin/activate base; cd yuchan/CAN; ./joining.sh 2  $total_node_nums $sever_index $number_of_server ${server_array[@]}"
+ssh -p 6304 user@${server_array[$sever_index]} "source ~/anaconda3/bin/activate base; cd pyCAN; ./joining.sh 2  $total_node_nums $sever_index $number_of_server ${server_array[@]}"
 
 #----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 # Mode 2 is Node join from other servers and last server send Mode 3 to original server 
@@ -93,7 +93,7 @@ done
 if [ $sever_index -ne $number_of_server ];
 then
 # send to next server(Mode 2) to join Nodes
-ssh -p 6304 deepl@${server_array[$sever_index]} "source ~/anaconda3/bin/activate base; cd yuchan/CAN; ./joining.sh 2  $total_node_nums $sever_index $number_of_server ${server_array[@]}"
+ssh -p 6304 user@${server_array[$sever_index]} "source ~/anaconda3/bin/activate base; cd pyCAN; ./joining.sh 2  $total_node_nums $sever_index $number_of_server ${server_array[@]}"
 
 fi
 
