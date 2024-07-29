@@ -29,7 +29,7 @@ from Split import Split
 
 class NodeBase:
     def __init__(self, port, node_num, bootstrap):
-        with open('/home/deepl/yuchan/CAN/setting.json') as f:
+        with open('./setting.json') as f:
             config = json.load(f)
         self.this_ip = socket.gethostbyname(socket.gethostname())
         self.this_port = port
