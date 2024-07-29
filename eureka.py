@@ -308,7 +308,7 @@ if __name__ == '__main__':
     parser.add_argument('-d','--dimension',type=int,default= 7)
     parser.add_argument('-m','--max_coordinate',type=float,default=65536)
     parser.add_argument('-n','--node_nums',type=int,default=200)
-    parser.add_argument('-r','--route',default="/home/deepl/yuchan/CAN/log")
+    parser.add_argument('-r','--route',default="/home/user/pyCAN/log")
     args=parser.parse_args()
 
     print('Eureka Start!')
