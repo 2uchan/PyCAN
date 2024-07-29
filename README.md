@@ -1,4 +1,4 @@
-# pyCAN
+# PyCAN
 Multi dimensinonal Content Addressable Network implemented by Python
 
 ## Introduce
