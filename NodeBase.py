@@ -606,7 +606,7 @@ class NodeBase:
                     self.sender(msg,a)
             #time.sleep(3)
 
-            log_file = open("/home/deepl/yuchan/CAN/log.txt", "w")
+            log_file = open("./log.txt", "w")
             log_file.write("Queue reset!"+"("+str(self.node_num)+")")
             log_file.close()
             print("done!")
@@ -614,7 +614,7 @@ class NodeBase:
 
         elif msg[0] == 'node scan':
             print('make file Node{}'.format(self.node_num))
-            f = open("/home/deepl/yuchan/CAN/log/Node{}.txt".format(self.node_num),'w')
+            f = open("/enter_your_log_directory/Node{}.txt".format(self.node_num),'w')
             f.write(str(self.this_addr)+'\n')
             f.write(str(self.z.getCoords())+'\n')
             f.write(str(self.point)+'\n') 
@@ -624,11 +624,11 @@ class NodeBase:
             f.write(str(self.nn_table)+'\n')
             f.close()
             with self.szlock:
-                with open("/home/deepl/yuchan/CAN/size/Node{}.txt".format(self.node_num),'w') as file:      ## 측정용
+                with open("/home/enter_your_size_directory/Node{}.txt".format(self.node_num),'w') as file:      ## 측정용
                     for key, value in self.size.items():
                         file.write(f"{key} {value}\n")
             '''
-            with open("/home/deepl/yuchan/CAN/head/Node{}.txt".format(self.node_num),'w') as file:      ## 측정용
+            with open("/home/enter_your_size_directory/Node{}.txt".format(self.node_num),'w') as file:      ## 측정용
                 size = copy.deepcopy(self.header)
                 for key, value in size.items():
                     file.write(f"{key} {value}\n")
