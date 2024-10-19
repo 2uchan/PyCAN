@@ -95,9 +95,9 @@ class Zone:
         self.point_max_distance = 0
         max_axis = 0
         
-        if self.oh[:-1] == self.jh[:-1]:
+        if self.oh[:] == self.jh[:]:
             max_axis = self.dimension - 1
-            print('same hash map')
+            print('!!!!!!!!!!!!!!!!same hash map!!!!!!!!!!!!!!!!!!')
         else :
             for axis in range(self.dimension):
                 distance = abs(self.oh[axis] - self.jh[axis])
