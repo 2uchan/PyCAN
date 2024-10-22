@@ -106,9 +106,9 @@ class NodeBase:
         while self.alive:
             time.sleep(2)
             if not self.alone:
-                self.stablize()
+                self.stabilize()
         
-    def stablize(self):
+    def stabilize(self):
         self.ctime = int(time.time())
         if self.ctime>=self.heart_time: 
             with self.zlock:
