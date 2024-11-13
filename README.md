@@ -5,7 +5,7 @@ Multi dimensinonal Content Addressable Network implemented by Python
 We have implemented a scalable content addressable network (CAN) capable of organizing nodes in a multidimensional space and allowing for the addition and deletion of nodes.
 
 ## Develop period
-* 23.06.12 ~ present
+* June/12/2023 ~ July/28/2024
 
 ## Participating workforce
  **Korea Aerospace University** 
